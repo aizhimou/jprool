@@ -1,0 +1,41 @@
+# 服务配置
+server:
+  port: 8888
+
+# 代理业务配置
+proxy:
+  # 代理池配置
+  pool:
+    # 代理池初始大小
+    init-capacity: 1000
+  # 代理供应商配置
+  provider:
+    # 获取供应商代理线程池大小
+    pool-size: 2
+    # 青果网络代理服务
+    qg:
+      enabled: true
+      deduplicate-pool-size: 1000
+      request-base-url: http://127.0.0.1:7000/qg
+      request-initial-delay: 1
+      request-rate: 3
+      request-timeout: 5
+      request-success-code: 0
+      businessKey: bily
+      num: 1
+      authKey: B7DEB870
+      authPwd: bily
+    # 站大爷代理服务
+    zdaye:
+      enabled: true
+      deduplicate-pool-size: 1000
+      request-base-url: http://127.0.0.1:7000/zdaye
+      request-initial-delay: 1
+      request-rate: 5
+      request-timeout: 5
+      request-success-code: 10001
+      api: skjdh
+      akey: aoiwer
+      count: 5
+      adr:
+      timespan: 1
