@@ -3,14 +3,16 @@ package top.asimov.jprool.proxy;
 import java.time.LocalDateTime;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 /**
  * 有时效性的代理
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @SuperBuilder
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class TimelinessProxy extends AbstractProxy implements Comparable<TimelinessProxy> {
 
   /**

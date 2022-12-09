@@ -9,9 +9,12 @@ import org.springframework.stereotype.Component;
 import top.asimov.jprool.exception.ServiceException;
 import top.asimov.jprool.proxy.AbstractProxy;
 
+/**
+ * 优先阻塞队列实现的代理池，按到期时间从远到近设置优先级，距离到期时间越近越先使用
+ */
 @Slf4j
 @Component
-public class PriorityQueueProxyPool implements ProxyPool{
+public class PriorityProxyPool implements ProxyPool{
 
   private static Queue<AbstractProxy> pool;
 

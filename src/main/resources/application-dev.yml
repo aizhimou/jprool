@@ -14,7 +14,7 @@ proxy:
     pool-size: 2
     # 青果网络代理服务
     qg:
-      enabled: true
+      enabled: false
       deduplicate-pool-size: 1000
       request-base-url: http://127.0.0.1:7000/qg
       request-initial-delay: 1
@@ -27,7 +27,7 @@ proxy:
       authPwd: bily
     # 站大爷代理服务
     zdaye:
-      enabled: true
+      enabled: false
       deduplicate-pool-size: 1000
       request-base-url: http://127.0.0.1:7000/zdaye
       request-initial-delay: 1

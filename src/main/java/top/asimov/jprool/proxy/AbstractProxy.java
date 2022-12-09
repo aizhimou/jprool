@@ -1,6 +1,7 @@
 package top.asimov.jprool.proxy;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import top.asimov.jprool.proxy.enums.ProtocolEnum;
 
@@ -9,6 +10,7 @@ import top.asimov.jprool.proxy.enums.ProtocolEnum;
  */
 @Data
 @SuperBuilder
+@NoArgsConstructor
 public abstract class AbstractProxy {
 
   /**
@@ -32,6 +34,16 @@ public abstract class AbstractProxy {
   private String host;
 
   /**
+   * 代理认证用户名
+   */
+  private String username;
+
+  /**
+   * 代理认证密码
+   */
+  private String password;
+
+  /**
    * ISP
    */
   private String isp;
@@ -45,11 +57,6 @@ public abstract class AbstractProxy {
    * 代理来源
    */
   private String source;
-
-  /**
-   * 代理验证
-   */
-  // private ProxyAuthentication authentication;
 
   public abstract Boolean invalid();
 
