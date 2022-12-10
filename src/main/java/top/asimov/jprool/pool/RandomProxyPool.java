@@ -1,7 +1,5 @@
 package top.asimov.jprool.pool;
 
-import com.github.monkeywie.proxyee.proxy.ProxyConfig;
-import com.github.monkeywie.proxyee.proxy.ProxyType;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
@@ -64,8 +62,4 @@ public class RandomProxyPool implements ProxyPool{
     return pool.stream().toList();
   }
 
-  public ProxyConfig getProxy() {
-    AbstractProxy proxy = get();
-    return new ProxyConfig(ProxyType.HTTP, proxy.getIp(), proxy.getPort());
-  }
 }

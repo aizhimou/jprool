@@ -1,9 +1,9 @@
 package top.asimov.jprool.proxy;
 
+import com.github.monkeywie.proxyee.proxy.ProxyType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import top.asimov.jprool.proxy.enums.ProtocolEnum;
 
 /**
  * 基本代理类
@@ -16,7 +16,7 @@ public abstract class AbstractProxy {
   /**
    * 代理协议
    */
-  private ProtocolEnum protocol;
+  private ProxyType proxyType;
 
   /**
    * 代理IP

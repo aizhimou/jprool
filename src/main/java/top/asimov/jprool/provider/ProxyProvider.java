@@ -1,9 +1,11 @@
 package top.asimov.jprool.provider;
 
+import top.asimov.jprool.provider.ProxyProviderConfig.BusinessConfig;
+
 @SuppressWarnings("unused")
 public interface ProxyProvider {
 
-  void scheduledAddProxyToPool();
+  // void scheduledAddProxyToPool();
 
-  void addroxyToPool(BaseProviderConfig config);
+  void addroxyToPool(BusinessConfig config);
 }

@@ -1,7 +1,7 @@
-package top.asimov.jprool.provider.qg;
+package top.asimov.jprool.provider;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import jakarta.annotation.PostConstruct;
+import com.github.monkeywie.proxyee.proxy.ProxyType;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -11,48 +11,50 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import top.asimov.jprool.pool.ProxyPool;
-import top.asimov.jprool.provider.AbstractProxyProvider;
+import top.asimov.jprool.provider.ProxyProviderConfig.BusinessConfig;
 import top.asimov.jprool.proxy.AbstractProxy;
 import top.asimov.jprool.proxy.TimelinessProxy;
-import top.asimov.jprool.proxy.enums.ProtocolEnum;
 
 @Slf4j
 @Component
-@ConditionalOnProperty(value = "proxy.provider.qg.enabled")
 public class QgProxyProvider extends AbstractProxyProvider {
 
   private final static DateTimeFormatter pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-  private final QgProxyConfig config;
 
-  private final HashSet<TimelinessProxy> unduplicateProxySet;
+  private final List<ProxyProviderConfig> providerConfigList;
 
-  public QgProxyProvider(ProxyPool proxyPool, QgProxyConfig config) {
+  private HashSet<TimelinessProxy> unduplicateProxySet;
+
+  private ProxyProviderConfig providerConfig;
+
+  public QgProxyProvider(ProxyPool proxyPool, List<ProxyProviderConfig> providerConfigList) {
+    this.providerConfigList = providerConfigList;
     super.proxyPool = proxyPool;
-    this.config = config;
-    this.unduplicateProxySet = new HashSet<>(config.getDeduplicatePoolSize());
+    loadQgConfig();
+  }
+
+  public ProxyProviderConfig getProviderConfig() {
+    return this.providerConfig;
+  }
+
+  private void loadQgConfig() {
+    this.providerConfig = providerConfigList.stream()
+        .filter(config -> config.getProvider().equals("qg.net"))
+        .findFirst().orElse(null);
+    // enabledQgProvider = Objects.nonNull(this.providerConfig);
+    if (Objects.nonNull(this.providerConfig)) {
+      this.unduplicateProxySet = new HashSet<>(providerConfig.getDeduplicatePoolSize());
+    }
   }
 
   @Override
-  @PostConstruct
-  public void scheduledAddProxyToPool() {
-    ses.scheduleAtFixedRate(() -> this.addroxyToPool(config),
-        config.getRequestInitialDelay(), config.getRequestRate(), TimeUnit.SECONDS);
-  }
-
-  @Override
-  protected String createRequestUrl() {
-    return String.format("%s?Key=%s&Num=%d", config.getRequestBaseUrl(), config.getAuthKey(), config.getNum());
-  }
-
-  @Override
-  protected JsonNode getProxyJsonNode(JsonNode rawJsonNode) {
+  protected JsonNode getProxyJsonNode(JsonNode rawJsonNode, BusinessConfig businessConfig) {
     String code = rawJsonNode.get("Code").asText();
-    if (!config.getRequestSuccessCode().equals(code)) {
+    if (!businessConfig.getRequestConfig().getSuccessCode().equals(code)) {
       log.error("青果代理API请求错误：{}", rawJsonNode.get("Msg").asText());
       return null;
     }
@@ -60,7 +62,8 @@ public class QgProxyProvider extends AbstractProxyProvider {
   }
 
   @Override
-  protected List<AbstractProxy> convert(JsonNode proxyJsonNode) {
+  protected List<AbstractProxy> convert(JsonNode proxyJsonNode, BusinessConfig businessConfig) {
+    ProxyType proxyType = ProxyType.valueOf(businessConfig.getProxyType().toUpperCase());
     List<AbstractProxy> list = new ArrayList<>(proxyJsonNode.size());
     Map<String, String> map = new HashMap<>(1);
     for (JsonNode proxy : proxyJsonNode) {
@@ -72,7 +75,9 @@ public class QgProxyProvider extends AbstractProxyProvider {
           .host(String.format("%s:%s", map.get("IP"), map.get("port")))
           .region(map.get("region"))
           .expirationTimestamp(LocalDateTime.parse(map.get("deadline"), pattern))
-          .protocol(ProtocolEnum.http)
+          .proxyType(proxyType)
+          .username(businessConfig.getUsername())
+          .password(businessConfig.getPassword())
           .source("qg.net")
           .build();
       if (unduplicate(timelinessProxy)) {
@@ -83,7 +88,7 @@ public class QgProxyProvider extends AbstractProxyProvider {
   }
 
   private Boolean unduplicate(TimelinessProxy proxy) {
-    if (unduplicateProxySet.size() >= config.getDeduplicatePoolSize()) {
+    if (unduplicateProxySet.size() >= providerConfig.getDeduplicatePoolSize()) {
       log.info("clear {} unduplicateProxySet !", getClass().getSimpleName());
       unduplicateProxySet.clear();
     }

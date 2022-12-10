@@ -1,0 +1,79 @@
+[
+  {
+    "provider": "qg.net",
+    "enabled": true,
+    "deduplicatePoolSize": 1000,
+    "businessConfigs": [
+      {
+        "enabled": true,
+        "proxyType": "http",
+        "username": "bily",
+        "password": "971001",
+        "apiConfig": {
+          "baseUrl": "http://127.0.0.1:7000/qg",
+          "Key": "bily",
+          "Num": 0,
+          "AreaId": 0,
+          "ISP": 0,
+          "Detail": 1
+        },
+        "requestConfig": {
+          "initialDelay": 1,
+          "rate": 3,
+          "timeout": 3,
+          "statusCode": "Code",
+          "successCode": "0"
+        }
+      },
+      {
+        "enabled": true,
+        "proxyType": "socks5",
+        "username": "asimov",
+        "password": "950925",
+        "apiConfig": {
+          "baseUrl": "http://127.0.0.1:7000/qg",
+          "Key": "asimov",
+          "Num": 0,
+          "AreaId": 0,
+          "ISP": 0,
+          "Detail": 1
+        },
+        "requestConfig": {
+          "initialDelay": 1,
+          "rate": 3,
+          "timeout": 3,
+          "statusCode": "Code",
+          "successCode": "0"
+        }
+      }
+    ]
+  },
+  {
+    "provider": "zdaye.com",
+    "enabled": true,
+    "deduplicatePoolSize": 1000,
+    "businessConfigs": [
+      {
+        "enabled": true,
+        "proxyType": "socks5",
+        "username": "admin",
+        "password": "admin",
+        "apiConfig": {
+          "baseUrl": "http://127.0.0.1:7000/zdaye",
+          "api": "",
+          "akey": "",
+          "adr": 0,
+          "timespan": 0,
+          "type": 1
+        },
+        "requestConfig": {
+          "initialDelay": 1,
+          "rate": 5,
+          "timeout": 3,
+          "statusCode": "code",
+          "successCode": "10001"
+        }
+      }
+    ]
+  }
+]
