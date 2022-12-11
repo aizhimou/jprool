@@ -3,7 +3,7 @@
     "provider": "qg.net",
     "enabled": true,
     "deduplicatePoolSize": 1000,
-    "businessConfigs": [
+    "businessConfig": [
       {
         "enabled": true,
         "proxyType": "http",
@@ -19,7 +19,7 @@
         },
         "requestConfig": {
           "initialDelay": 1,
-          "rate": 3,
+          "requestRate": 3,
           "timeout": 3,
           "statusCode": "Code",
           "successCode": "0"
@@ -40,7 +40,7 @@
         },
         "requestConfig": {
           "initialDelay": 1,
-          "rate": 3,
+          "requestRate": 3,
           "timeout": 3,
           "statusCode": "Code",
           "successCode": "0"
@@ -52,7 +52,7 @@
     "provider": "zdaye.com",
     "enabled": true,
     "deduplicatePoolSize": 1000,
-    "businessConfigs": [
+    "businessConfig": [
       {
         "enabled": true,
         "proxyType": "socks5",
@@ -68,7 +68,7 @@
         },
         "requestConfig": {
           "initialDelay": 1,
-          "rate": 5,
+          "requestRate": 5,
           "timeout": 3,
           "statusCode": "code",
           "successCode": "10001"

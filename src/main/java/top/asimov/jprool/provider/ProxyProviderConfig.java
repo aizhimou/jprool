@@ -12,7 +12,7 @@ public class ProxyProviderConfig {
   private String provider;
   private Boolean enabled;
   private Integer deduplicatePoolSize;
-  private List<BusinessConfig> businessConfigs;
+  private List<BusinessConfig> businessConfig;
 
   @Getter
   @Setter
@@ -29,7 +29,7 @@ public class ProxyProviderConfig {
   @Setter
   public static class RequestConfig {
     private int initialDelay;
-    private int rate;
+    private int requestRate;
     private int timeout;
     private String statusCode;
     private String successCode;

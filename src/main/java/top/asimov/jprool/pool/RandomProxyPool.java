@@ -24,7 +24,7 @@ public class RandomProxyPool implements ProxyPool{
   @Override
   public void add(AbstractProxy proxy) {
     pool.add(proxy);
-    log.info("success added proxy [{}] to proxy pool", proxy.getHost());
+    log.info("success added proxy [{}] to proxy pool", proxy.toString());
   }
 
   @Override

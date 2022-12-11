@@ -1,18 +1,19 @@
 package top.asimov.jprool.provider;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.monkeywie.proxyee.proxy.ProxyType;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.ApplicationArguments;
 import org.springframework.stereotype.Component;
 import top.asimov.jprool.pool.ProxyPool;
 import top.asimov.jprool.provider.ProxyProviderConfig.BusinessConfig;
@@ -23,7 +24,9 @@ import top.asimov.jprool.proxy.TimelinessProxy;
 @Component
 public class QgProxyProvider extends AbstractProxyProvider {
 
-  private final static DateTimeFormatter pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+  private final static DateTimeFormatter PATTERN = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+  private final static String PROVIDER_NAME = "qg.net";
 
   private final List<ProxyProviderConfig> providerConfigList;
 
@@ -34,60 +37,61 @@ public class QgProxyProvider extends AbstractProxyProvider {
   public QgProxyProvider(ProxyPool proxyPool, List<ProxyProviderConfig> providerConfigList) {
     this.providerConfigList = providerConfigList;
     super.proxyPool = proxyPool;
-    loadQgConfig();
+    loadConfig();
   }
 
-  public ProxyProviderConfig getProviderConfig() {
-    return this.providerConfig;
+  @Override
+  public void run(ApplicationArguments args) {
+    super.scheduledAddProxyToPool(providerConfig);
   }
 
-  private void loadQgConfig() {
-    this.providerConfig = providerConfigList.stream()
-        .filter(config -> config.getProvider().equals("qg.net"))
-        .findFirst().orElse(null);
-    // enabledQgProvider = Objects.nonNull(this.providerConfig);
-    if (Objects.nonNull(this.providerConfig)) {
+  @Override
+  protected void loadConfig() {
+    providerConfig = super.loadConfig(providerConfigList, PROVIDER_NAME);
+    if (Objects.nonNull(providerConfig)) {
       this.unduplicateProxySet = new HashSet<>(providerConfig.getDeduplicatePoolSize());
     }
   }
 
   @Override
-  protected JsonNode getProxyJsonNode(JsonNode rawJsonNode, BusinessConfig businessConfig) {
-    String code = rawJsonNode.get("Code").asText();
-    if (!businessConfig.getRequestConfig().getSuccessCode().equals(code)) {
-      log.error("青果代理API请求错误：{}", rawJsonNode.get("Msg").asText());
-      return null;
-    }
-    return rawJsonNode.get("Data");
-  }
+  protected List<AbstractProxy> convert(String response, BusinessConfig config) {
+    try {
+      JsonNode rawJsonNode = objectMapper.readTree(response);
 
-  @Override
-  protected List<AbstractProxy> convert(JsonNode proxyJsonNode, BusinessConfig businessConfig) {
-    ProxyType proxyType = ProxyType.valueOf(businessConfig.getProxyType().toUpperCase());
-    List<AbstractProxy> list = new ArrayList<>(proxyJsonNode.size());
-    Map<String, String> map = new HashMap<>(1);
-    for (JsonNode proxy : proxyJsonNode) {
-      Iterator<Entry<String, JsonNode>> fields = proxy.fields();
-      fields.forEachRemaining(entry -> map.put(entry.getKey(), entry.getValue().asText()));
-      TimelinessProxy timelinessProxy = TimelinessProxy.builder()
-          .ip(map.get("IP"))
-          .port(Integer.parseInt(map.get("port")))
-          .host(String.format("%s:%s", map.get("IP"), map.get("port")))
-          .region(map.get("region"))
-          .expirationTimestamp(LocalDateTime.parse(map.get("deadline"), pattern))
-          .proxyType(proxyType)
-          .username(businessConfig.getUsername())
-          .password(businessConfig.getPassword())
-          .source("qg.net")
-          .build();
-      if (unduplicate(timelinessProxy)) {
-        list.add(timelinessProxy);
+      String code = rawJsonNode.get("Code").asText();
+      if (!config.getRequestConfig().getSuccessCode().equals(code)) {
+        log.error("青果代理API返回错误：{}", rawJsonNode.get("Msg").asText());
+        return Collections.emptyList();
       }
+      JsonNode proxyJsonNode = rawJsonNode.get("Data");
+
+      ProxyType proxyType = ProxyType.valueOf(config.getProxyType().toUpperCase());
+      List<AbstractProxy> list = new ArrayList<>(proxyJsonNode.size());
+      for (JsonNode proxy : proxyJsonNode) {
+        Map<String, String> map = objectMapper.convertValue(proxy, new TypeReference<>(){});
+        TimelinessProxy timelinessProxy = TimelinessProxy.builder()
+            .ip(map.get("IP"))
+            .port(Integer.parseInt(map.get("port")))
+            .host(String.format("%s:%s", map.get("IP"), map.get("port")))
+            .region(map.get("region"))
+            .expirationTimestamp(LocalDateTime.parse(map.get("deadline"), PATTERN))
+            .proxyType(proxyType)
+            .username(config.getUsername())
+            .password(config.getPassword())
+            .source(PROVIDER_NAME)
+            .build();
+        if (unduplicate(timelinessProxy)) {
+          list.add(timelinessProxy);
+        }
+      }
+      return list;
+    } catch (JsonProcessingException jsonProcessingException) {
+      log.error("青果代理转换错误：{}", jsonProcessingException.getMessage());
     }
-    return list;
+    return Collections.emptyList();
   }
 
-  private Boolean unduplicate(TimelinessProxy proxy) {
+  protected Boolean unduplicate(TimelinessProxy proxy) {
     if (unduplicateProxySet.size() >= providerConfig.getDeduplicatePoolSize()) {
       log.info("clear {} unduplicateProxySet !", getClass().getSimpleName());
       unduplicateProxySet.clear();
