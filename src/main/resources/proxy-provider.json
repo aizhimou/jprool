@@ -1,7 +1,7 @@
 [
   {
     "provider": "qg.net",
-    "enabled": true,
+    "enabled": false,
     "deduplicatePoolSize": 1000,
     "businessConfig": [
       {
@@ -50,7 +50,7 @@
   },
   {
     "provider": "zdaye.com",
-    "enabled": true,
+    "enabled": false,
     "deduplicatePoolSize": 1000,
     "businessConfig": [
       {

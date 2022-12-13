@@ -1,6 +1,26 @@
 # 服务配置
 server:
-  port: 8888
+  port: 8080
+
+spring:
+  boot:
+    admin:
+      client:
+        url: http://127.0.0.1:8080
+        instance:
+          name: jprool
+          service-url: http://127.0.0.1:8080
+        username: admin
+        password: admin
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    shutdown:
+      enabled: true
 
 # 代理业务配置
 proxy:
